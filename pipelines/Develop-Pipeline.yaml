@@ -1,16 +1,20 @@
 name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
- 
+
 variables:
   - group: terraform-develop
-   
-# Only run against develop
-trigger: none
- 
+
 pool:
   vmImage: ubuntu-latest
+
+trigger:
+  batch: true 
+  branches:
+    include:
+      - develop
+
 # Don't run against PRs
 pr: none
- 
+
 stages :
   - stage: validate
     jobs:
@@ -37,14 +41,13 @@ stages :
         inputs:
           provider: 'azurerm'
           command: 'validate'
-           
+          
   - stage: plan
     dependsOn: [validate]
     condition: succeeded('validate')
     jobs:
       - job: terraform_plan_develop
         steps:
-              - checkout: self
               - task: TerraformInstaller@0
                 displayName: 'install'
                 inputs:
@@ -68,21 +71,13 @@ stages :
                   commandOptions: '-input=false -var-file="../vars/$(Environment)/$(Environment).tfvars"'
                   environmentServiceNameAzureRM: 'SP'
                   workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/'
- 
+
   - stage: apply
     dependsOn: [plan]
     condition: succeeded('plan')
-    jobs: 
-    - job: terraform_apply_develop
-    - deployment: terraform_apply
-      continueOnError: false
-      environment: 'approvalgates-production'
-      timeoutInMinutes: 120
-      strategy:
-       runOnce:
-        deploy:
-         steps:
-              - checkout: self
+    jobs:
+      - job: terraform_apply_develop
+        steps:
               - task: TerraformInstaller@0
                 displayName: 'install'
                 inputs:
@@ -96,7 +91,7 @@ stages :
                   backendAzureRmResourceGroupName: 'tamopstf'
                   backendAzureRmStorageAccountName: 'tamopstfs'
                   backendAzureRmContainerName: 'tfstatedevops'
-                  backendAzureRmKey: 'terraform.tfstate'
+                  backendAzureRmKey: 'terraformdev.tfstate' 
                   workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/'
               - task: TerraformTaskV1@0
                 displayName: 'plan'
@@ -112,5 +107,5 @@ stages :
                   provider: 'azurerm'
                   command: 'apply'
                   commandOptions: '-input=false -auto-approve -var-file="../vars/$(Environment)/$(Environment).tfvars"'
-                  environmentServiceNameAzureRM: ''SP'
+                  environmentServiceNameAzureRM: 'SP'
                   workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/'
