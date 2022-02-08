@@ -112,5 +112,5 @@ stages :
                   provider: 'azurerm'
                   command: 'apply'
                   commandOptions: '-input=false -auto-approve -var-file="../vars/$(Environment)/$(Environment).tfvars"'
-                  environmentServiceNameAzureRM: ''SP'
+                  environmentServiceNameAzureRM: 'SP'
                   workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/'
