@@ -16,7 +16,7 @@ terraform {
 }
 
 # Create Resource Group
-resource "azurerm_resource_group" "test123" {
+resource "azurerm_resource_group" "terraformdevelop" {
   name     = var.resource_group_name
   location = var.location 
 
@@ -28,7 +28,7 @@ resource "azurerm_resource_group" "test123" {
 # Create Storage account
 resource "azurerm_storage_account" "storage_account" {
   name                = var.storage_account_name
-  resource_group_name = azurerm_resource_group.test123.name
+  resource_group_name = azurerm_resource_group.terraformdevelop.name
 
   location                 = var.location
   account_tier             = "Standard"
@@ -58,7 +58,7 @@ resource "azurerm_storage_blob" "example_blob" {
 resource "azurerm_virtual_network" "vnet123" {
   name                = var.vnet_name
   location            = var.location
-  resource_group_name = azurerm_resource_group.test123.name
+  resource_group_name = azurerm_resource_group.terraformdevelop.name
   address_space       = ["10.0.0.0/16"]
   dns_servers         = ["10.0.0.4","10.0.0.5", "10.0.0.6","10.0.0.7","10.0.0.8"]
 
